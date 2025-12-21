@@ -134,5 +134,14 @@ if __name__ == "__main__":
         print("❌ توکن در محیط تنظیم نشده.")
         exit(1)
 
+    # Flask بره تو Thread
+    threading.Thread(target=run_flask, daemon=True).start()
+
+    # بات تلگرام حتماً در thread اصلی
+    start_bot()
+
+        exit(1)
+
     threading.Thread(target=start_bot).start()
     run_flask()
+
