@@ -25,7 +25,7 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_logs[user_id] = []
 
     user_logs[user_id].append(f" {now_str} : {text}")
-    await update.message.reply_text(f"ساعت {now_str} ثبت شد: {text}")
+    await update.message.reply_text(f" {now_str} : {text}")
 
 # نمایش همه پیام‌ها
 async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -44,4 +44,5 @@ if __name__ == "__main__":
 
     print("Bot running...")
     app.run_polling()
+
 
