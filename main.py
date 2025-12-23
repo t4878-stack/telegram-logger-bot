@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from datetime import datetime
 
-TOKEN = "8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I"
+TOKEN = "BOT_TOKEN"
 
 
 # دیکشنری برای ذخیره پیام‌ها به ازای هر کاربر
@@ -51,3 +51,4 @@ if __name__ == "__main__":
 
     print("Bot running...")
     app.run_polling()
+
