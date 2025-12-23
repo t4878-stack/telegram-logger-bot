@@ -63,7 +63,7 @@ async def daily_summary():
         await app.bot.send_message(chat_id, f"💡 کارهای دیروز:\n{summary}")
     save_tasks([])
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN = os.environ.get("8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I")
 if not BOT_TOKEN:
     print("Error: BOT_TOKEN is not set in environment!")
     exit(1)
@@ -81,3 +81,4 @@ scheduler.add_job(lambda: app.create_task(daily_summary()), "cron", hour=0, minu
 scheduler.start()
 
 app.run_polling()
+
