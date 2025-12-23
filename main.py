@@ -1,6 +1,7 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from datetime import datetime, timedelta
+from persiantools.jdatetime import JalaliDate
 
 TOKEN = "8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I"
 
@@ -20,19 +21,29 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text
     now = datetime.utcnow() + timedelta(hours=3, minutes=30)  # ایران +3:30
     now_str = now.strftime("%H:%M")
+    today_str = now.date().isoformat()  # YYYY-MM-DD برای ذخیره‌سازی روز
 
     if user_id not in user_logs:
         user_logs[user_id] = []
 
-    user_logs[user_id].append(f" {now_str} : {text}")
-    await update.message.reply_text(f" {now_str} : {text}")
+    user_logs[user_id].append((today_str, f"{now_str} : {text}"))
+    await update.message.reply_text(f"{now_str} : {text}")
 
-# نمایش همه پیام‌ها
+# نمایش پیام‌های امروز با تاریخ شمسی
 async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
-    if user_id in user_logs and user_logs[user_id]:
-        message = "\n".join(user_logs[user_id])
-        await update.message.reply_text(message)
+    now = datetime.utcnow() + timedelta(hours=3, minutes=30)
+    today_str = now.date().isoformat()
+
+    if user_id in user_logs:
+        today_messages = [msg for date, msg in user_logs[user_id] if date == today_str]
+
+        if today_messages:
+            jalali_date = JalaliDate(now.date())
+            message = f"پیام‌های امروز {jalali_date.strftime('%-d %B %Y')}\n" + "\n".join(today_messages)
+            await update.message.reply_text(message)
+        else:
+            await update.message.reply_text("هیچ پیامی امروز ثبت نشده است.")
     else:
         await update.message.reply_text("هیچ پیامی ثبت نشده است.")
 
@@ -44,5 +55,3 @@ if __name__ == "__main__":
 
     print("Bot running...")
     app.run_polling()
-
-
