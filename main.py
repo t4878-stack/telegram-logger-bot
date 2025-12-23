@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-import os
 
 DATA_FILE = "daily_tasks.json"
 CHAT_IDS = set()
@@ -63,10 +62,8 @@ async def daily_summary():
         await app.bot.send_message(chat_id, f"💡 کارهای دیروز:\n{summary}")
     save_tasks([])
 
-BOT_TOKEN = os.environ.get("8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I")
-if not BOT_TOKEN:
-    print("Error: BOT_TOKEN is not set in environment!")
-    exit(1)
+# مستقیم نام متغیر Shared Variable در Railway
+BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # بجای YOUR_BOT_TOKEN_HERE همان VALUE که در Shared Variables گذاشتی را بزن
 
 app = ApplicationBuilder().token(BOT_TOKEN).build()
 
@@ -81,4 +78,3 @@ scheduler.add_job(lambda: app.create_task(daily_summary()), "cron", hour=0, minu
 scheduler.start()
 
 app.run_polling()
-
