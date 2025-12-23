@@ -14,7 +14,7 @@ from telegram.ext import (
 # =====================
 # CONFIG
 # =====================
-TOKEN = os.environ.get("8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I")
+TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 PORT = int(os.environ.get("PORT", 10000))
 
 if not TOKEN:
@@ -83,3 +83,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
