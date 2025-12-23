@@ -4,18 +4,21 @@ from datetime import datetime, timedelta, time
 
 TOKEN = "8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I"
 
+# دیکشنری برای ذخیره پیام‌ها به ازای هر کاربر
 user_logs = {}
 
+# دستور /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "سلام! پیام هاتو بفرست تا با زمان ثبت کنم.\n"
         "برای دیدن همه پیام‌ها /show رو بزن."
     )
 
+# ذخیره پیام‌ها با زمان ایران
 async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     text = update.message.text
-    now = datetime.utcnow() + timedelta(hours=3, minutes=30)
+    now = datetime.utcnow() + timedelta(hours=3, minutes=30)  # ایران +3:30
     now_str = now.strftime("%H:%M")
 
     if user_id not in user_logs:
@@ -24,6 +27,7 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_logs[user_id].append(f"{now_str} : {text}")
     await update.message.reply_text(f"{now_str} : {text}")
 
+# نمایش همه پیام‌ها با تاریخ
 async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     if user_id in user_logs and user_logs[user_id]:
