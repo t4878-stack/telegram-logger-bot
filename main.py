@@ -5,9 +5,8 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 import threading
 
-TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
-if not TOKEN:
-    raise RuntimeError("TELEGRAM_BOT_TOKEN not set")
+TOKEN = os.environ.get("8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I")
+
 
 app = Flask(__name__)
 
@@ -43,3 +42,4 @@ def run_bot():
 if __name__ == "__main__":
     threading.Thread(target=run_bot, daemon=True).start()
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+
