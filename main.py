@@ -1,80 +1,53 @@
-import json
-from datetime import datetime, timedelta
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, CallbackQueryHandler, ContextTypes, filters
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from datetime import datetime
 
-DATA_FILE = "daily_tasks.json"
-CHAT_IDS = set()
+TOKEN = "BOT_TOKEN"
 
-def iran_now():
-    return datetime.utcnow() + timedelta(hours=3, minutes=30)
 
-def load_tasks():
-    try:
-        with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
-        return []
+# دیکشنری برای ذخیره پیام‌ها به ازای هر کاربر
+user_logs = {}
 
-def save_tasks(tasks):
-    with open(DATA_FILE, "w", encoding="utf-8") as f:
-        json.dump(tasks, f, ensure_ascii=False, indent=2)
+# دستور /start
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    CHAT_IDS.add(update.message.chat_id)
-    await update.message.reply_text("سلام! پیام‌های امروزت ذخیره می‌شوند و شب جمع‌بندی می‌کنم.")
+    await update.message.reply_text(
+        "سلام! پیام هاتو بفرست تا با زمان ثبت کنم.\n"
+        "برای دیدن همه پیام‌ها /show رو بزن."
+    )
 
-async def add_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+# ذخیره پیام‌ها با زمان
+
+
+async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
     text = update.message.text
-    iran_time = iran_now().strftime("%Y-%m-%d %H:%M")
-    tasks = load_tasks()
-    tasks.append(f"{iran_time} - {text}")
-    save_tasks(tasks)
+    now = datetime.now().strftime("%H:%M")
 
-async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    tasks = load_tasks()
-    if not tasks:
-        await update.message.reply_text("هیچ کاری امروز ثبت نشده.")
+    if user_id not in user_logs:
+        user_logs[user_id] = []
+
+    user_logs[user_id].append(f"ساعت {now} : {text}")
+    await update.message.reply_text(f" ساعت {now} : {text}")
+
+# نمایش همه پیام‌ها
+
+
+async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.message.from_user.id
+    if user_id in user_logs and user_logs[user_id]:
+        message = "\n".join(user_logs[user_id])
+        await update.message.reply_text(message)
     else:
-        await update.message.reply_text("\n".join(tasks))
+        await update.message.reply_text("هیچ پیامی ثبت نشده است.")
 
-async def show_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton("نمایش کارهای امروز", callback_data="show")]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("برای مشاهده کارهای امروز:", reply_markup=reply_markup)
+if __name__ == "__main__":
+    app = ApplicationBuilder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("show", show_logs))
+    app.add_handler(MessageHandler(
+        filters.TEXT & ~filters.COMMAND, log_message))
 
-async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-    tasks = load_tasks()
-    if not tasks:
-        await query.edit_message_text("هیچ کاری امروز ثبت نشده.")
-    else:
-        await query.edit_message_text("\n".join(tasks))
-
-async def daily_summary():
-    tasks = load_tasks()
-    if not tasks:
-        return
-    summary = "\n".join(tasks)
-    for chat_id in CHAT_IDS:
-        await app.bot.send_message(chat_id, f"💡 کارهای دیروز:\n{summary}")
-    save_tasks([])
-
-# مستقیم نام متغیر Shared Variable در Railway
-BOT_TOKEN = "YOUR_BOT_TOKEN_HERE"  # بجای YOUR_BOT_TOKEN_HERE همان VALUE که در Shared Variables گذاشتی را بزن
-
-app = ApplicationBuilder().token(BOT_TOKEN).build()
-
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("show_button", show_button))
-app.add_handler(CommandHandler("show", show_tasks))
-app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, add_message))
-app.add_handler(CallbackQueryHandler(button_callback))
-
-scheduler = AsyncIOScheduler()
-scheduler.add_job(lambda: app.create_task(daily_summary()), "cron", hour=0, minute=0)
-scheduler.start()
-
-app.run_polling()
+    print("Bot running...")
+    app.run_polling()
