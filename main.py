@@ -1,8 +1,8 @@
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters, JobQueue
-from datetime import datetime, timedelta, time
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
+from datetime import datetime, timedelta
 
-TOKEN = "8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I"
+TOKEN = "توکن_ربات_تو"
 
 # دیکشنری برای ذخیره پیام‌ها به ازای هر کاربر
 user_logs = {}
@@ -24,37 +24,23 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_logs:
         user_logs[user_id] = []
 
-    user_logs[user_id].append(f"{now_str} : {text}")
-    await update.message.reply_text(f"{now_str} : {text}")
+    user_logs[user_id].append(f"ساعت {now_str} : {text}")
+    await update.message.reply_text(f"ساعت {now_str} ثبت شد: {text}")
 
-# نمایش همه پیام‌ها با تاریخ
+# نمایش همه پیام‌ها
 async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     if user_id in user_logs and user_logs[user_id]:
-        now = datetime.utcnow() + timedelta(hours=3, minutes=30)
-        date_str = now.strftime("%d %b %Y")
-        message = f"پیام‌های امروز {date_str}:\n" + "\n".join(user_logs[user_id])
+        message = "\n".join(user_logs[user_id])
         await update.message.reply_text(message)
     else:
         await update.message.reply_text("هیچ پیامی ثبت نشده است.")
-
-# پاکسازی شبانه با JobQueue
-async def clear_logs(context: ContextTypes.DEFAULT_TYPE):
-    user_logs.clear()
-    print("تمام پیام‌ها پاک شد!")
 
 if __name__ == "__main__":
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("show", show_logs))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, log_message))
-
-    # تنظیم JobQueue برای پاکسازی ساعت 12 شب
-    job_queue = app.job_queue
-    now = datetime.utcnow() + timedelta(hours=3, minutes=30)
-    midnight = datetime.combine(now.date() + timedelta(days=1), time())
-    seconds_until_midnight = (midnight - now).total_seconds()
-    job_queue.run_repeating(clear_logs, interval=24*60*60, first=seconds_until_midnight)
 
     print("Bot running...")
     app.run_polling()
