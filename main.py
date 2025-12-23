@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from datetime import datetime, timedelta
 
-TOKEN = "توکن_ربات_تو"
+TOKEN = "8542143557:AAEwuIFQCmyEU1EmiCEixA738H0UumiBt1I"
 
 # دیکشنری برای ذخیره پیام‌ها به ازای هر کاربر
 user_logs = {}
@@ -24,8 +24,8 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if user_id not in user_logs:
         user_logs[user_id] = []
 
-    user_logs[user_id].append(f"ساعت {now_str} : {text}")
-    await update.message.reply_text(f"ساعت {now_str} ثبت شد: {text}")
+    user_logs[user_id].append(f" {now_str} : {text}")
+    await update.message.reply_text(f" {now_str} : {text}")
 
 # نمایش همه پیام‌ها
 async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -44,3 +44,4 @@ if __name__ == "__main__":
 
     print("Bot running...")
     app.run_polling()
+
