@@ -28,20 +28,20 @@ async def log_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_logs[user_id].append(f"{now_str} : {text}")
     await update.message.reply_text(f"{now_str} : {text}")
 
-# نمایش همه پیام‌ها با تاریخ امروز
+# نمایش پیام‌ها با تاریخ امروز
 async def show_logs(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.message.from_user.id
     today = (datetime.utcnow() + timedelta(hours=3, minutes=30)).date()
     today_str = today.strftime("%Y-%m-%d")
-    
+
     if user_id in user_logs and user_logs[user_id]:
         messages = "\n".join(user_logs[user_id])
         await update.message.reply_text(f"پیام‌های امروز {today_str}:\n{messages}")
     else:
-        await update.message.reply_text("هیچ پیامی ثبت نشده است.")
+        await update.message.reply_text(f"پیام‌های امروز {today_str}:\nهیچ پیامی ثبت نشده است.")
 
 # پاکسازی خودکار ساعت 12 شب
-async def clear_logs_at_midnight(app):
+async def clear_logs_at_midnight():
     while True:
         now = datetime.utcnow() + timedelta(hours=3, minutes=30)
         next_midnight = datetime.combine(now.date() + timedelta(days=1), time())
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, log_message))
 
     # اجرای تسک پاکسازی خودکار در پس‌زمینه
-    app.job_queue.run_repeating(lambda _: clear_logs_at_midnight(app), interval=60, first=0)
+    asyncio.create_task(clear_logs_at_midnight())
 
     print("Bot running...")
     app.run_polling()
