@@ -37,8 +37,8 @@ async def show_tasks(update: Update, context: ContextTypes.DEFAULT_TYPE):
     tasks = load_tasks()
     if not tasks:
         await update.message.reply_text("هیچ کاری امروز ثبت نشده.")
-        return
-    await update.message.reply_text("\n".join(tasks))
+    else:
+        await update.message.reply_text("\n".join(tasks))
 
 async def show_button(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [[InlineKeyboardButton("نمایش کارهای امروز", callback_data="show")]]
@@ -63,7 +63,12 @@ async def daily_summary():
         await app.bot.send_message(chat_id, f"💡 کارهای دیروز:\n{summary}")
     save_tasks([])
 
-app = ApplicationBuilder().token(os.environ["BOT_TOKEN"]).build()
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+if not BOT_TOKEN:
+    print("Error: BOT_TOKEN is not set in environment!")
+    exit(1)
+
+app = ApplicationBuilder().token(BOT_TOKEN).build()
 
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("show_button", show_button))
